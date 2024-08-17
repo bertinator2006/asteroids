@@ -5,6 +5,14 @@
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 650
 
+struct Bullet
+{
+    struct Bullet* pre_bul;
+    Vector2 position;
+    Vector2 velocity;
+    struct Bullet* next_bul;
+};
+
 struct PlayerStruct
 {
     Vector2 position;
@@ -12,7 +20,10 @@ struct PlayerStruct
     float angle_rad;
     float radius;
     Color color;
+    struct Bullet first_bullet;
 };
+
+
 
 static void UpdateDrawFrame(struct PlayerStruct *player);
 void DrawPlayer(Vector2 position, float angle, float radius, Color color);
@@ -28,12 +39,17 @@ int main()
         .velocity = (Vector2){0, 0},
         .angle_rad = 0,
         .radius = 10,
-        .color = RED
+        .color = WHITE
     };
 
     InitWindow(screenWidth, screenHeight, "raylib");
 
     SetTargetFPS(144);
+    BeginDrawing();
+
+        ClearBackground(WHITE);
+
+    EndDrawing();
 
     while (!WindowShouldClose())
     {
@@ -52,8 +68,12 @@ static void UpdateDrawFrame(struct PlayerStruct *player)
     if (IsKeyDown(KEY_RIGHT)) player->angle_rad += 0.5 * GAME_SPEED * delta_time;
     if (IsKeyDown(KEY_LEFT)) player->angle_rad -= 0.5 * GAME_SPEED * delta_time;
     //TODO: Use vectors to move the player ore towards the direction they are facing
+    player->velocity.x -= player->velocity.x * 0.9 * delta_time;
+    player->velocity.y -= player->velocity.y * 0.9 * delta_time;
     if (IsKeyDown(KEY_UP))
     {
+        player->velocity.x -= player->velocity.x * 0.2 * delta_time;
+        player->velocity.y -= player->velocity.y * 0.2 * delta_time;
         player->velocity.x += GAME_SPEED * 50 * delta_time * cos(player->angle_rad);
         player->velocity.y += GAME_SPEED * 50 * delta_time * sin(player->angle_rad);
     }
@@ -71,10 +91,8 @@ static void UpdateDrawFrame(struct PlayerStruct *player)
     
     BeginDrawing();
 
-        ClearBackground(BLACK);
-        DrawText("This is a raylib example", 10, 40, 20, DARKGRAY);
+        ClearBackground(BLANK);
         DrawPlayer(player->position, player->angle_rad, player->radius, player->color); 
-        DrawFPS(10, 10);
 
     EndDrawing();
 }
